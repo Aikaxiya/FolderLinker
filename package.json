@@ -1,0 +1,27 @@
+{
+  "name": "folder-linker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "把文件夹迁移到其它磁盘，并在原路径建立目录联接",
+  "bin": "src/main.js",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "node src/main.js",
+    "icon": "node scripts/build-icon.js",
+    "build": "node scripts/build.js"
+  },
+  "pkg": {
+    "assets": [
+      "src/ui/**/*"
+    ],
+    "targets": [
+      "node22-win-x64"
+    ],
+    "outputPath": "dist"
+  },
+  "devDependencies": {
+    "@yao-pkg/pkg": "^6.24.0",
+    "rcedit": "^5.0.2",
+    "resedit": "^3.1.0"
+  }
+}

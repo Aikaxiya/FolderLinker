@@ -1,0 +1,19 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+assets/icon/tmp/
+
+# IDE / 编辑器
+.idea/
+.vscode/
+
+# AI 助手本地记忆（属于本机状态，不进版本库）
+.workbuddy-ai/
+
+# 系统与临时文件
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.tmp

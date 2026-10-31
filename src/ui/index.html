@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html data-theme="light" lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <title>文件夹联接器</title>
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('fl-theme');
+                var theme = saved || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                document.documentElement.setAttribute('data-theme', theme);
+            } catch (err) {
+                document.documentElement.setAttribute('data-theme', 'light');
+            }
+        })();
+    </script>
+    <link href="/favicon.ico" rel="icon" type="image/x-icon">
+    <link href="/style.css" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+    <header class="topbar">
+        <div class="brand">
+            <div class="logo">
+                <svg fill="none" height="17" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                     viewBox="0 0 24 24" width="17">
+                    <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.2l1.6 2H18a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 18 19H5.5A2.5 2.5 0 0 1 3 16.5z"></path>
+                    <path d="M9 12h6M12.5 9.5 15 12l-2.5 2.5"></path>
+                </svg>
+            </div>
+            <div class="brand-text">
+                <h1>文件夹联接器</h1>
+                <p>迁移到其它磁盘，原路径留下目录联接</p>
+            </div>
+        </div>
+        <div class="top-actions">
+            <button class="icon-btn" id="btn-theme" title="切换深浅色">
+                <svg class="ico-moon" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                     stroke-width="1.8" viewBox="0 0 24 24" width="16">
+                    <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4 8.5 8.5 0 1 0 20 14.5z"></path>
+                </svg>
+                <svg class="ico-sun" fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                     stroke-width="1.8" viewBox="0 0 24 24" width="16">
+                    <circle cx="12" cy="12" r="4"></circle>
+                    <path d="M12 3v2M12 19v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M3 12h2M19 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path>
+                </svg>
+            </button>
+            <button class="btn ghost sm" id="btn-log">打开日志</button>
+            <button class="btn ghost sm" id="btn-quit">退出</button>
+        </div>
+    </header>
+
+    <main class="content">
+        <section class="panel">
+            <div class="panel-head">
+                <h2>迁移设置</h2>
+                <span class="hint" id="plan-hint">选择源文件夹与目标文件夹</span>
+            </div>
+
+            <div class="path-row" id="row-source">
+                <div class="path-icon src">
+                    <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                         viewBox="0 0 24 24" width="16">
+                        <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.2l1.6 2H18a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 18 19H5.5A2.5 2.5 0 0 1 3 16.5z"></path>
+                    </svg>
+                </div>
+                <div class="path-body">
+                    <div class="path-label">源文件夹 <span class="tag">迁移后变联接</span></div>
+                    <input autocomplete="off" class="path-input" id="source-path" placeholder="选择文件夹，或直接粘贴路径" spellcheck="false"
+                           type="text">
+                    <div class="path-meta" id="source-meta"></div>
+                </div>
+                <div class="row-actions">
+                    <button class="btn ghost" data-check="source" disabled>检查</button>
+                    <button class="icon-btn" data-reveal="source" disabled title="在资源管理器打开">
+                        <svg fill="none" height="15" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                             stroke-width="1.7" viewBox="0 0 24 24" width="15">
+                            <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.2l1.6 2H18a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 18 19H5.5A2.5 2.5 0 0 1 3 16.5z"></path>
+                            <path d="M13 13.5h4.5M15.5 11v5"></path>
+                        </svg>
+                    </button>
+                    <button class="btn" data-pick="source">选择</button>
+                </div>
+            </div>
+
+            <div class="connector">
+                <span class="connector-line"></span>
+                <span class="connector-text">复制 → 校验 → 替换为联接</span>
+            </div>
+
+            <div class="path-row" id="row-target">
+                <div class="path-icon dst">
+                    <svg fill="none" height="16" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.7"
+                         viewBox="0 0 24 24" width="16">
+                        <path d="M3 6.5A2.5 2.5 0 0 1 5.5 4h13A2.5 2.5 0 0 1 21 6.5v11A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z"></path>
+                        <path d="M7 10h10M7 14h6"></path>
+                    </svg>
+                </div>
+                <div class="path-body">
+                    <div class="path-label">目标文件夹 <span class="tag alt">文件实际存放位置</span></div>
+                    <input autocomplete="off" class="path-input" id="target-path" placeholder="选择文件夹，或直接粘贴路径" spellcheck="false"
+                           type="text">
+                    <div class="path-meta" id="target-meta"></div>
+                </div>
+                <div class="row-actions">
+                    <button class="btn ghost" data-check="target" disabled>检查</button>
+                    <button class="icon-btn" data-reveal="target" disabled title="在资源管理器打开">
+                        <svg fill="none" height="15" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                             stroke-width="1.7" viewBox="0 0 24 24" width="15">
+                            <path d="M3 7.5A2.5 2.5 0 0 1 5.5 5h3.2l1.6 2H18a2.5 2.5 0 0 1 2.5 2.5v7A2.5 2.5 0 0 1 18 19H5.5A2.5 2.5 0 0 1 3 16.5z"></path>
+                            <path d="M13 13.5h4.5M15.5 11v5"></path>
+                        </svg>
+                    </button>
+                    <button class="btn" data-pick="target">选择</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel options">
+            <div class="opt-label">校验强度</div>
+            <div class="segmented" id="seg-strict">
+                <button class="seg active" data-strict="0">
+                    <strong>快速</strong>
+                    <span>比对文件数与总字节</span>
+                </button>
+                <button class="seg" data-strict="1">
+                    <strong>严格</strong>
+                    <span>逐文件 SHA-256 哈希</span>
+                </button>
+            </div>
+        </section>
+
+        <div class="planbar" hidden id="planbar">
+            <div class="planbar-main" id="planbar-main"></div>
+            <div class="planbar-sub" id="planbar-sub"></div>
+        </div>
+
+        <button class="btn primary lg" disabled id="btn-run">开始迁移</button>
+
+        <section class="panel progress" hidden id="progress">
+            <div class="steps" id="steps">
+                <div class="step" data-step="copy"><i></i><span>复制</span></div>
+                <div class="step" data-step="verify"><i></i><span>校验</span></div>
+                <div class="step" data-step="swap"><i></i><span>替换</span></div>
+                <div class="step" data-step="done"><i></i><span>完成</span></div>
+            </div>
+            <div class="bar">
+                <div class="bar-fill" id="bar-fill"></div>
+            </div>
+            <div class="progress-meta">
+                <span id="progress-text">准备中…</span>
+                <span id="progress-pct">0%</span>
+            </div>
+            <div class="current-file" id="current-file"></div>
+            <button class="btn danger sm" id="btn-cancel">取消迁移</button>
+        </section>
+
+        <section class="panel result" hidden id="result">
+            <div class="result-head">
+                <div class="result-icon" id="result-icon"></div>
+                <div class="result-body">
+                    <div class="result-title" id="result-title"></div>
+                    <div class="result-sub" id="result-sub"></div>
+                </div>
+                <button class="btn sm" hidden id="btn-open-target">打开位置</button>
+            </div>
+            <div class="result-detail" id="result-detail"></div>
+        </section>
+
+        <section class="panel history">
+            <div class="panel-head">
+                <h2>迁移记录</h2>
+                <button class="link" id="btn-refresh">刷新</button>
+            </div>
+            <div class="history-list" id="history-list">
+                <div class="empty-state">暂无记录</div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div class="modal-mask" hidden id="confirm-mask">
+    <div aria-labelledby="confirm-text" aria-modal="true" class="modal" role="dialog">
+        <div class="modal-text" id="confirm-text"></div>
+        <div class="modal-actions">
+            <button class="btn ghost" id="confirm-cancel">取消</button>
+            <button class="btn primary" id="confirm-ok">确定</button>
+        </div>
+    </div>
+</div>
+
+<div class="modal-mask" hidden id="locks-mask">
+    <div aria-modal="true" class="modal modal-wide" role="dialog">
+        <div class="modal-title" id="locks-title">占用情况</div>
+        <div class="locks-body" id="locks-body"></div>
+        <div class="modal-actions">
+            <button class="btn ghost" id="locks-refresh">重新扫描</button>
+            <button class="btn" id="locks-close">关闭</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<script src="/app.js"></script>
+</body>
+</html>
